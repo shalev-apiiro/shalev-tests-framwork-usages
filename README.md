@@ -1,6 +1,6 @@
 # shalev-tests-framwork-usages
 
-Samples for apiiro/lim PR #53550 (Python SessionManagement framework usages). One file per new config.
+Python SessionManagement framework usage samples. One file per framework config.
 
 | File | Config | Expected framework | Should match |
 | --- | --- | --- | --- |
