@@ -81,7 +81,7 @@ No `requirements.txt` entries are added for them on purpose, so a match proves c
 | `djangosaml2_hooks.py` | `Python.Djangosaml2.json` | Django SAML2 Python | import `djangosaml2`; `get_saml_user`, `post_login_hook` |
 | `mozilla_django_oidc_backend.py` | `Python.MozillaDjangoOidc.json` | Mozilla Django OIDC Python | import `mozilla_django_oidc`; `verify_claims`, `filter_users_by_claims` |
 | `pysaml2_sp.py` | `Python.Pysaml2.json` | PySAML2 Python | import `saml2`; `prepare_for_authenticate`, `parse_authn_request_response` |
-| `python3_saml_views.py` | `Python.Python3Saml.json` | python3-saml Python | import `onelogin.saml2`; `process_response`, `process_slo`, `get_sp_metadata` |
+| `python3_saml_views.py` | `Python.Python3Saml.json` | Python3 SAML Python | import `onelogin.saml2`; `process_response`, `process_slo`, `get_sp_metadata` |
 | `python_social_auth_pipeline.py` | `Python.PythonSocialAuth.json` | Python Social Auth Python | import `social_core`, `social_django`; `do_auth`, `do_complete`, `auth_complete`, `load_strategy`; decorator `psa` |
 
 ## KeyManagementService (`kms/`)
@@ -90,5 +90,5 @@ No `requirements.txt` entries are added for them on purpose, so a match proves c
 | --- | --- | --- | --- |
 | `cryptography_multifernet.py` | `Python.CryptographyKeyManagement.json` | Cryptography Key Management Python | `MultiFernet` |
 | `pykcs11_hsm.py` | `Python.Pykcs11.json` | PyKCS11 Python | import `PyKCS11` |
-| `python_pkcs11_hsm.py` | `Python.PythonPkcs11.json` | Python PKCS11 | import `pkcs11` |
-| `yubihsm_keys.py` | `Python.PythonYubihsm.json` | Python YubiHSM | import `yubihsm` |
+| `python_pkcs11_hsm.py` | `Python.PythonPkcs11.json` | Python PKCS11 Python | import `pkcs11` |
+| `yubihsm_keys.py` | `Python.PythonYubihsm.json` | Python YubiHSM Python | import `yubihsm` |

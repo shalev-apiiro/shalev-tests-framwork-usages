@@ -1,4 +1,4 @@
-# Python.PythonYubihsm.json -> "Python YubiHSM" [KeyManagementService]
+# Python.PythonYubihsm.json -> "Python YubiHSM Python" [KeyManagementService]
 # Expected: import yubihsm
 from yubihsm import YubiHsm
 from yubihsm.defs import ALGORITHM, CAPABILITY

@@ -1,4 +1,4 @@
-# Python.Python3Saml.json -> "python3-saml Python" [SSO]
+# Python.Python3Saml.json -> "Python3 SAML Python" [SSO]
 # Expected: import onelogin.saml2; methods process_response, process_slo, get_sp_metadata
 from flask import Flask, make_response, redirect, request, session
 from onelogin.saml2.auth import OneLogin_Saml2_Auth

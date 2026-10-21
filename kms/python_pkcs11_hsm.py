@@ -1,4 +1,4 @@
-# Python.PythonPkcs11.json -> "Python PKCS11" [KeyManagementService]
+# Python.PythonPkcs11.json -> "Python PKCS11 Python" [KeyManagementService]
 # Expected: import pkcs11
 import pkcs11
 from pkcs11 import KeyType, Mechanism, ObjectClass
