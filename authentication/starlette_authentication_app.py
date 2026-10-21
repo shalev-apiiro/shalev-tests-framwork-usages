@@ -1,7 +1,7 @@
 # Python.StarletteAuthentication.json -> "Starlette Authentication Python" [Authentication]
 # Expected: imports starlette.authentication + starlette.middleware.authentication;
-#           decorator requires; methods has_required_scope, add_middleware, Middleware
-import base64
+#           decorator requires; methods has_required_scope, Middleware
+import hashlib
 
 from starlette.applications import Starlette
 from starlette.authentication import (
@@ -14,39 +14,53 @@ from starlette.authentication import (
 )
 from starlette.middleware import Middleware
 from starlette.middleware.authentication import AuthenticationMiddleware
+from starlette.requests import HTTPConnection
 from starlette.responses import JSONResponse, PlainTextResponse
 from starlette.routing import Route
 
 
-class BasicAuthBackend(AuthenticationBackend):
-    async def authenticate(self, conn):
-        if "Authorization" not in conn.headers:
+class ApiTokenBackend(AuthenticationBackend):
+    async def authenticate(self, conn: HTTPConnection):
+        header = conn.headers.get("Authorization")
+        if header is None:
             return None
-        try:
-            scheme, credentials = conn.headers["Authorization"].split()
-            decoded = base64.b64decode(credentials).decode("ascii")
-        except (ValueError, UnicodeDecodeError):
-            raise AuthenticationError("Invalid basic auth credentials")
-        username, _, _ = decoded.partition(":")
-        return AuthCredentials(["authenticated"]), SimpleUser(username)
+        scheme, _, token = header.partition(" ")
+        if scheme.lower() != "bearer" or not token:
+            raise AuthenticationError("expected a bearer token")
+
+        record = await conn.app.state.api_tokens.find_by_digest(hashlib.sha256(token.encode()).hexdigest())
+        if record is None or record.revoked:
+            raise AuthenticationError("unknown or revoked token")
+        return AuthCredentials(["authenticated", *record.scopes]), SimpleUser(record.owner)
+
+
+def on_auth_error(conn: HTTPConnection, exc: Exception):
+    return PlainTextResponse(str(exc), status_code=401)
 
 
 @requires("authenticated")
-async def homepage(request):
-    return PlainTextResponse(f"hello {request.user.display_name}")
+async def list_reports(request):
+    rows = await request.app.state.reports.for_owner(request.user.username)
+    if has_required_scope(request, ["reports:financials"]):
+        return JSONResponse([row.full() for row in rows])
+    return JSONResponse([row.summary() for row in rows])
 
 
-async def status(request):
-    return JSONResponse({"admin": has_required_scope(request, ["admin"])})
+@requires(["authenticated", "reports:write"])
+async def create_report(request):
+    body = await request.json()
+    report = await request.app.state.reports.create(owner=request.user.username, title=body["title"])
+    return JSONResponse({"id": report.id}, status_code=201)
 
 
-app = Starlette(
-    routes=[Route("/", homepage), Route("/status", status)],
-    middleware=[Middleware(AuthenticationMiddleware, backend=BasicAuthBackend())],
-)
-
-
-def build_app_with_add_middleware():
-    other = Starlette(routes=[Route("/", homepage)])
-    other.add_middleware(AuthenticationMiddleware, backend=BasicAuthBackend())
-    return other
+def create_app(api_tokens, reports) -> Starlette:
+    app = Starlette(
+        routes=[
+            Route("/reports", list_reports, methods=["GET"]),
+            Route("/reports", create_report, methods=["POST"]),
+        ],
+        middleware=[Middleware(AuthenticationMiddleware, backend=ApiTokenBackend(), on_error=on_auth_error)],
+    )
+    app.state.api_tokens = api_tokens
+    app.state.reports = reports
+    return app

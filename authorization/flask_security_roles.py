@@ -1,8 +1,10 @@
 # Python.FlaskSecurityAuthorization.json -> "Flask Security Authorization Python" [Authorization]
 # Expected: decorators roles_required, roles_accepted, permissions_required, permissions_accepted;
 #           methods has_role + has_permission
-from flask import Flask, abort
+# Admin blueprint of a Flask-Security app; Security() and the user datastore are set up in the app factory.
+from flask import Blueprint, abort, current_app, jsonify, render_template, request
 from flask_security import (
+    auth_required,
     current_user,
     permissions_accepted,
     permissions_required,
@@ -10,35 +12,44 @@ from flask_security import (
     roles_required,
 )
 
-app = Flask(__name__)
+admin = Blueprint("admin", __name__, url_prefix="/admin")
 
 
-@app.route("/admin")
-@roles_required("admin")
-def admin_panel():
-    return "admins only"
+def datastore():
+    return current_app.extensions["security"].datastore
 
 
-@app.route("/reports")
-@roles_accepted("admin", "auditor")
-def reports():
-    return "admins or auditors"
+@admin.route("/")
+@auth_required()
+@roles_accepted("admin", "support")
+def index():
+    return render_template("admin/index.html", show_billing=current_user.has_permission("billing-read"))
 
 
-@app.route("/users", methods=["POST"])
-@permissions_required("user-write")
-def create_user():
-    return "created"
-
-
-@app.route("/users")
+@admin.route("/users")
+@auth_required()
 @permissions_accepted("user-read", "user-write")
 def list_users():
-    return "users"
+    users = datastore().user_model.query.order_by("email").all()
+    return jsonify([{"id": u.id, "email": u.email, "roles": [r.name for r in u.roles]} for u in users])
 
 
-@app.route("/billing")
-def billing():
-    if not current_user.has_role("billing") and not current_user.has_permission("billing-read"):
+@admin.route("/users/<int:user_id>/roles", methods=["POST"])
+@auth_required()
+@permissions_required("user-write")
+def grant_role(user_id):
+    role = request.json["role"]
+    if role == "admin" and not current_user.has_role("admin"):
         abort(403)
-    return "billing"
+    user = datastore().find_user(id=user_id)
+    datastore().add_role_to_user(user, role)
+    datastore().commit()
+    return jsonify({"status": "granted"})
+
+
+@admin.route("/maintenance", methods=["POST"])
+@auth_required()
+@roles_required("admin")
+def toggle_maintenance():
+    current_app.config["MAINTENANCE_MODE"] = request.json["enabled"]
+    return jsonify({"maintenance": current_app.config["MAINTENANCE_MODE"]})
