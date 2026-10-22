@@ -2,7 +2,7 @@
 
 Python framework usage samples. One file per framework config.
 
-Security-control folders (`authentication/`, `authorization/`, `mfa/`, `sso/`, `kms/`) cover the configs added in apiiro/lim PR #53887.
+Security-control folders (`authentication/`, `authorization/`, `mfa/`, `sso/`, `kms/`) cover the configs added in apiiro/lim PR #53887, and `validation/` covers the input-validation configs from apiiro/lim PR #53755.
 No `requirements.txt` entries are added for them on purpose, so a match proves code-level detection, not dependency detection.
 Each sample is written as code from a real application and was import-checked against the real libraries.
 A library with several concerns gets a small package (one file per concern), shaped like the Django app or module a project would have.
@@ -106,3 +106,17 @@ A library with several concerns gets a small package (one file per concern), sha
 | `pykcs11_hsm.py` | `Python.Pykcs11.json` | PyKCS11 Python | import `PyKCS11` |
 | `python_pkcs11_hsm.py` | `Python.PythonPkcs11.json` | Python PKCS11 Python | import `pkcs11` |
 | `yubihsm_keys.py` | `Python.PythonYubihsm.json` | Python YubiHSM Python | import `yubihsm` |
+
+## InputValidation (`validation/`)
+
+| File | Config | Expected framework | Should match |
+| --- | --- | --- | --- |
+| `pydantic_models.py` | `Python.Pydantic.json` | Pydantic Python | import `pydantic`; decorators `field_validator`, `model_validator`, `validate_call` |
+| `pydantic_webhooks.py` | `Python.Pydantic.json` | Pydantic Python | import `pydantic`; `model_validate_json`, `model_validate`, `validate_python` (via `TypeAdapter`) |
+| `jsonschema_config.py` | `Python.Jsonschema.json` | jsonschema Python | import `jsonschema`; `validate`, `is_valid` |
+| `cerberus_import.py` | `Python.Cerberus.json` | Cerberus Python | import `cerberus`; `validate`, `validated` |
+| `orders/views.py` | `Python.DjangoInputValidation.json` | Django Input Validation Python | `is_valid` on a Django form (gated on the `django` import) |
+| `orders/api.py` | `Python.DjangoInputValidation.json` | Django Input Validation Python | `is_valid` on a DRF serializer (gated on the `rest_framework` import) |
+| `orders/forms.py` | `Python.DjangoInputValidation.json` | — | nothing: the form definition used by `orders/views.py` |
+| `clamav_upload_scan.py` | `Python.ClamAV.json` | ClamAV Python (SecurityTools) | import `clamd` |
+| `pyclamd_nightly_scan.py` | `Python.ClamAV.json` | ClamAV Python (SecurityTools) | import `pyclamd` |
