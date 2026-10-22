@@ -1,5 +1,6 @@
-# Python.SqlalchemyUtils.json -> "SQLAlchemy-Utils Python" [Encryption]
-# Expected: import sqlalchemy_utils.StringEncryptedType and sqlalchemy_utils.types.encrypted...
+# NEGATIVE SAMPLE: SQLAlchemy-Utils encrypted types (row 56) was deliberately skipped in apiiro/lim PR #53633,
+# so this file must NOT be detected as an Encryption control.
+# Expected: no framework usage detected
 import os
 
 from sqlalchemy import Column, Integer

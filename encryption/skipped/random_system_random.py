@@ -1,5 +1,6 @@
-# Python.RandomSystemRandom.json -> "random.SystemRandom Python" [Encryption]
-# Expected: import random, method SystemRandom
+# NEGATIVE SAMPLE: random.SystemRandom (row 53) was deliberately skipped in apiiro/lim PR #53633,
+# so this file must NOT be detected as an Encryption control.
+# Expected: no framework usage detected
 import random
 import string
 

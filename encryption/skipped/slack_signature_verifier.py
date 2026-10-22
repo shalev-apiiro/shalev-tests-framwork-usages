@@ -1,5 +1,6 @@
-# Python.Slack.json (extended) -> "Slack SDK Python" [Messaging, Encryption]
-# Expected: import slack_sdk.signature, methods is_valid_request / is_valid
+# NEGATIVE SAMPLE: Slack SDK signature verifier (row 55) was deliberately skipped in apiiro/lim PR #53633,
+# so this file must NOT be detected as an Encryption control.
+# Expected: Slack SDK Python [Messaging] only (import slack_sdk), never Encryption
 import os
 
 from slack_sdk.signature import SignatureVerifier

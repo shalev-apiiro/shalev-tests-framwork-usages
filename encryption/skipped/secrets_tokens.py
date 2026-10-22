@@ -1,5 +1,6 @@
-# Python.Secrets.json -> "Secrets Python" [Encryption]
-# Expected: import secrets, methods token_bytes, token_hex, token_urlsafe, choice, randbelow, randbits, SystemRandom
+# NEGATIVE SAMPLE: secrets (std-lib) (row 54) was deliberately skipped in apiiro/lim PR #53633,
+# so this file must NOT be detected as an Encryption control.
+# Expected: no framework usage detected
 import secrets
 import string
 

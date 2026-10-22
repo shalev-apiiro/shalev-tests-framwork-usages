@@ -1,49 +1,56 @@
 # shalev-tests-framwork-usages
 
-Python framework usage samples. One file per framework config.
+Python framework usage samples for the security-control configs added to apiiro/lim in October 2026.
 
-Security-control folders (`authentication/`, `authorization/`, `mfa/`, `sso/`, `kms/`) cover the configs added in apiiro/lim PR #53887, and `validation/` covers the input-validation configs from apiiro/lim PR #53755.
-No `requirements.txt` entries are added for them on purpose, so a match proves code-level detection, not dependency detection.
+Session samples sit at the repo root (apiiro/lim PR #53550), `encryption/` covers PR #53633, `validation/` covers PR #53755, and `authentication/`, `authorization/`, `mfa/`, `sso/` and `kms/` cover PR #53887.
+`requirements.txt` only lists the session and encryption libraries; the other folders' libraries are left out on purpose, so a match proves code-level detection, not dependency detection.
 Each sample is written as code from a real application and was import-checked against the real libraries.
 A library with several concerns gets a small package (one file per concern), shaped like the Django app or module a project would have.
 "Should match" lists the config's own entries the file hits. Generic configs (Django, Flask, Starlette, logging, hashlib, requests and so on) can match too and are not listed.
 
-## SessionManagement
+## SessionManagement (repo root, apiiro/lim PR #53550)
 
 | File | Config | Expected framework | Should match |
 | --- | --- | --- | --- |
-| `aiohttp_session_app.py` | `Python.AiohttpSession.json` | aiohttp-session Python | import `aiohttp_session`, `new_session`, `invalidate` |
-| `django_sessions_views.py` | `Python.DjangoSessions.json` | Django Sessions Python | import `django.contrib.sessions...`, `cycle_key`, `acycle_key`, `logout`, `alogout` |
-| `flask_builtin_session_app.py` | `Python.FlaskBuiltInSession.json` | Flask Session Python | `from flask import session` |
-| `flask_session_app.py` | `Python.FlaskSession.json` | Flask-Session Python | import `flask_session`, `regenerate` |
-| `flask_login_logout.py` | `Python.FlaskLoginSession.json` | Flask-Login Session Python | `logout_user` |
+| `aiohttp_session_app.py` | `Python.AiohttpSession.json` | Aiohttp Session Python | import `aiohttp_session`; `new_session`, `get_session`, `invalidate` |
+| `django_sessions_views.py` | `Python.DjangoSessions.json` | Django Sessions Python | import `django.contrib.sessions`; `cycle_key`, `acycle_key` (gated on the `django.contrib.auth` import) |
+| `flask_builtin_session_app.py` | `Python.FlaskSession.json` | Flask Session Python | `from flask import session` |
+| `flask_session_app.py` | `Python.FlaskSession.json` | Flask Session Python | import `flask_session`, `from flask import session`; `regenerate` |
+| `flask_login_logout.py` | `Python.FlaskSession.json` | Flask Session Python | `logout_user` (bare and `flask_login.logout_user()`); the `flask_login` import itself stays Flask-Login Python |
 | `starlette_sessions_app.py` | `Python.StarletteSessionMiddleware.json` | Starlette Sessions Python | import `starlette.middleware.sessions` |
 
-## Encryption (`encryption/`)
+## Encryption (`encryption/`, apiiro/lim PR #53633)
 
 | File | Config | Expected framework | Should match |
 | --- | --- | --- | --- |
 | `argon2_password_hasher.py` | `Python.Argon2Cffi.json` | Argon2 Python | import `argon2` |
 | `bcrypt_hashing.py` | `Python.Bcrypt.json` | Bcrypt Python | import `bcrypt` |
-| `passlib_crypt_context.py` | `Python.Passlib.json` | Passlib Python | import `passlib.context`, `passlib.hash` |
+| `passlib_crypt_context.py` | `Python.Passlib.json` | Passlib Python | import `passlib.context` |
 | `aws_encryption_sdk_envelope.py` | `Python.AwsEncryptionSdk.json` | AWS Encryption SDK Python | import `aws_encryption_sdk` |
 | `tink_aead.py` | `Python.Tink.json` | Google Tink Python | import `tink` |
-| `sqlalchemy_utils_encrypted_columns.py` | `Python.SqlalchemyUtils.json` | SQLAlchemy-Utils Python | import `sqlalchemy_utils.StringEncryptedType`, `sqlalchemy_utils.types.encrypted...` |
-| `svix_webhook_verify.py` | `Python.Svix.json` | Svix Python | import `svix.webhooks`, `verify` |
-| `os_urandom_tokens.py` | `Python.OsUrandom.json` | os.urandom Python | import `os`, `urandom` |
-| `random_system_random.py` | `Python.RandomSystemRandom.json` | random.SystemRandom Python | import `random`, `SystemRandom` |
-| `secrets_tokens.py` | `Python.Secrets.json` | Secrets Python | import `secrets`, `token_bytes`, `token_hex`, `token_urlsafe`, `choice`, `randbelow`, `randbits`, `SystemRandom` |
-| `werkzeug_password_hashing.py` | `Python.werkzeug.json` | Werkzeug Python (ApiServer + Encryption) | import `werkzeug.security.generate_password_hash` / `check_password_hash` |
-| `pymongo_client_side_encryption.py` | `Python.pymongo.json` | MongoDB Python (DataStorage + Encryption) | import `pymongo.encryption`, `pymongo.encryption_options` |
-| `slack_signature_verifier.py` | `Python.Slack.json` | Slack SDK Python (Messaging + Encryption) | import `slack_sdk.signature`, `is_valid_request`, `is_valid` |
-| `stripe_webhook_verify.py` | `Python.StripePayment.json` | Stripe Python (Encryption) | import `stripe`, `construct_event`, `verify_header` |
-| `twilio_request_validator.py` | `Python.Twilio.json` | Twilio Python (CustomerEngagementPlatform + Encryption) | import `twilio.request_validator`, `validate` |
+| `werkzeug_password_hashing.py` | `Python.WerkzeugSecurity.json` | Werkzeug Security Python | import `werkzeug.security.generate_password_hash` / `check_password_hash` |
+| `pymongo_client_side_encryption.py` | `Python.PymongoEncryption.json` | MongoDB Encryption Python | import `pymongo.encryption`, `pymongo.encryption_options` |
+
+### Negative samples (`encryption/skipped/`)
+
+These rows were deliberately skipped in apiiro/lim PR #53633, so none of these files may be detected as an Encryption control.
+
+| File | Skipped row | Expected detection |
+| --- | --- | --- |
+| `os_urandom_tokens.py` | os.urandom (35) | none |
+| `random_system_random.py` | random.SystemRandom (53) | none |
+| `secrets_tokens.py` | secrets std-lib (54) | none |
+| `slack_signature_verifier.py` | Slack SDK signature verifier (55) | Slack SDK Python [Messaging] only |
+| `sqlalchemy_utils_encrypted_columns.py` | SQLAlchemy-Utils encrypted types (56) | none |
+| `stripe_webhook_verify.py` | Stripe webhook verification (61) | none (Stripe Python only matches Payments `create` calls) |
+| `svix_webhook_verify.py` | Svix webhook verification (62) | none |
+| `twilio_request_validator.py` | Twilio RequestValidator (64) | none |
 
 ## Authentication (`authentication/`)
 
 | File | Config | Expected framework | Should match |
 | --- | --- | --- | --- |
-| `aiohttp_security_app.py` | `Python.AiohttpSecurity.json` | Aiohttp Security Python | `setup_security` (alias of `aiohttp_security.setup`), `check_authorized`; also aiohttp-session Python (`import aiohttp_session`) |
+| `aiohttp_security_app.py` | `Python.AiohttpSecurity.json` | Aiohttp Security Python | `setup_security` (alias of `aiohttp_security.setup`), `check_authorized`; also Aiohttp Session Python (`import aiohttp_session`) |
 | `django_allauth/views.py` | `Python.DjangoAllauth.json` | Django Allauth Python | import `allauth.account`; decorators `verified_email_required`, `reauthentication_required` |
 | `django_allauth/drf_api.py` | `Python.DjangoAllauth.json` | Django Allauth Python | import `allauth.headless.contrib.rest_framework.authentication` |
 | `django_allauth/ninja_api.py` | `Python.DjangoAllauth.json` | Django Allauth Python | import `allauth.headless.contrib.ninja.security` |

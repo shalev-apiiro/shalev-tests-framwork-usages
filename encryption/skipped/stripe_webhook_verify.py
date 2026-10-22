@@ -1,6 +1,6 @@
-# Python.StripePayment.json (extended) -> "Stripe Python" [Encryption]
-# Expected: import stripe, methods construct_event / verify_header
-# (no `.create(` call in this file: the existing Payments `create` entry would win)
+# NEGATIVE SAMPLE: Stripe webhook verification (row 61) was deliberately skipped in apiiro/lim PR #53633,
+# so this file must NOT be detected as an Encryption control.
+# Expected: nothing (Stripe Python only matches Payments `create` calls)
 import os
 
 import stripe
@@ -11,7 +11,7 @@ ENDPOINT_SECRET = os.environ["STRIPE_WEBHOOK_SECRET"]
 def handle_webhook(payload: bytes, sig_header: str):
     try:
         return stripe.Webhook.construct_event(payload, sig_header, ENDPOINT_SECRET)
-    except stripe.error.SignatureVerificationError:
+    except stripe.SignatureVerificationError:
         raise PermissionError("invalid stripe signature")
 
 

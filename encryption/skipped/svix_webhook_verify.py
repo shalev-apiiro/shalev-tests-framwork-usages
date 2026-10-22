@@ -1,5 +1,6 @@
-# Python.Svix.json -> "Svix Python" [Encryption]
-# Expected: import svix.webhooks, method verify
+# NEGATIVE SAMPLE: Svix webhook verification (row 62) was deliberately skipped in apiiro/lim PR #53633,
+# so this file must NOT be detected as an Encryption control.
+# Expected: no framework usage detected
 import os
 
 from svix.webhooks import Webhook, WebhookVerificationError

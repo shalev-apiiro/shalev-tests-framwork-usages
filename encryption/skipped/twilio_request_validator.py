@@ -1,5 +1,6 @@
-# Python.Twilio.json (extended) -> "Twilio Python" [CustomerEngagementPlatform, Encryption]
-# Expected: import twilio.request_validator, method validate
+# NEGATIVE SAMPLE: Twilio RequestValidator (row 64) was deliberately skipped in apiiro/lim PR #53633,
+# so this file must NOT be detected as an Encryption control.
+# Expected: nothing (Twilio Python only matches twilio.rest / twiml messaging calls)
 import os
 
 from twilio.request_validator import RequestValidator
